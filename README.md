@@ -1,4 +1,4 @@
-# ics-render
+# ics_render
 
 Parse one or more ICS calendar files, merge their events, sort by start time, and print the result in several formats.
 

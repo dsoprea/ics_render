@@ -1,5 +1,5 @@
 [project]
-name = "ics-render"
+name = "ics_render"
 version = "0.1.0"
 description = "Parse ICS calendar files and print events in a sorted table"
 readme = "README.md"
@@ -22,6 +22,11 @@ packages = ["src/ics_render"]
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
+]
+build = [
+    "build>=1.0.0",
+    "hatchling>=1.0.0",
+    "twine>=5.0.0",
 ]
 
 [tool.pytest.ini_options]

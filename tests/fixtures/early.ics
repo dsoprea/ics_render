@@ -1,6 +1,6 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//ics-render//test//
+PRODID:-//ics_render//test//
 BEGIN:VEVENT
 UID:early-1@example
 DTSTART:20240601T090000Z
