@@ -33,7 +33,9 @@ def test_combine_events_gen_sorts_across_files():
 def test_get_events_as_table_rows_gen_projects_columns():
     events = [
         {
-            "timestamp": "2024-06-01T09:00:00+00:00",
+            "start": "2024-06-01T09:00:00+00:00",
+            "stop": "2024-06-01T09:30:00+00:00",
+            "description": "",
             "duration": "0:30:00",
             "name": "Morning standup",
             "sort_key": None,

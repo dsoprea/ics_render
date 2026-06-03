@@ -31,3 +31,21 @@ def test_main_jsonl_prints_sorted_events(capsys):
     assert len(parsed_events) == 1
     assert parsed_events[0]["summary"]["value"] == "Morning standup"
     assert parsed_events[0]["start"]["value"] == "2024-06-01T09:00:00+00:00"
+
+
+def test_main_html_prints_document(capsys):
+    early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
+    argv = [
+        "--html",
+        "--filepath",
+        early_path,
+    ]
+
+    ics_render.entrypoint.ir_format.main(argv)
+    captured = capsys.readouterr()
+
+    assert "<!DOCTYPE html>" in captured.out
+    assert "Morning standup" in captured.out
+    assert "2024-06-01T09:00:00+00:00" in captured.out
+    assert "2024-06-01T09:30:00+00:00" in captured.out
+    assert 'title="Daily team sync"' in captured.out

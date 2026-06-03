@@ -8,7 +8,7 @@ import icalendar
 
 
 def get_events_from_file_gen(filepath):
-    """Yield event dicts with timestamp, name, and sort_key from one ICS file."""
+    """Yield event dicts with start, stop, duration, name, description, and sort_key."""
 
     with open(filepath, "rb") as file_handle:
         raw_bytes = file_handle.read()
@@ -25,8 +25,10 @@ def get_events_from_file_gen(filepath):
 
         start_value = start_property.dt
         sort_key = _build_sort_key_for_start(start_value)
-        timestamp_label = _format_start(start_value)
+        start_label = _format_start(start_value)
+        stop_label = _build_stop_label_for_component(component, start_value)
         duration_label = _build_duration_label_for_component(component, start_value)
+        description_text = _build_description_for_component(component)
         ics_record = _build_ics_record_from_component(component)
         summary_property = component.get("summary")
         if summary_property is None:
@@ -35,9 +37,11 @@ def get_events_from_file_gen(filepath):
             event_name = str(summary_property)
 
         yield {
-            "timestamp": timestamp_label,
+            "start": start_label,
+            "stop": stop_label,
             "duration": duration_label,
             "name": event_name,
+            "description": description_text,
             "sort_key": sort_key,
             "ics_record": ics_record,
         }
@@ -61,11 +65,11 @@ def combine_events_gen(filepaths):
 
 
 def get_events_as_table_rows_gen(events):
-    """Yield (timestamp, duration, name) tuples for tabulate from event dicts."""
+    """Yield (start, duration, name) tuples for tabulate from event dicts."""
 
     # Project each event to the three display columns.
     for event in events:
-        row = (event["timestamp"], event["duration"], event["name"])
+        row = (event["start"], event["duration"], event["name"])
         yield row
 
 
@@ -132,6 +136,28 @@ def _convert_ics_name_to_friendly_key(ics_name):
         return "tz_id"
 
     return normalized
+
+
+def _build_stop_label_for_component(component, start_value):
+    end_property = component.get("dtend")
+    if end_property is not None:
+        return _format_start(end_property.dt)
+
+    duration_property = component.get("duration")
+    if duration_property is not None:
+        start_normalized = _normalize_for_duration_math(start_value)
+        if start_normalized is not None:
+            end_normalized = start_normalized + duration_property.dt
+            return _format_start(end_normalized)
+
+    return ""
+
+
+def _build_description_for_component(component):
+    description_property = component.get("description")
+    if description_property is None:
+        return ""
+    return str(description_property)
 
 
 def _build_duration_label_for_component(component, start_value):

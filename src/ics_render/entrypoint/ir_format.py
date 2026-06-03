@@ -6,6 +6,7 @@ import sys
 import tabulate
 
 import ics_render.events
+import ics_render.html_calendar
 
 
 def main(argv=None):
@@ -25,10 +26,16 @@ def main(argv=None):
         metavar="PATH",
         help="Path to an ICS file (repeat for multiple files)",
     )
-    parser.add_argument(
+    output_format = parser.add_mutually_exclusive_group()
+    output_format.add_argument(
         "--jsonl",
         action="store_true",
         help="Print raw event data as JSON Lines instead of a table",
+    )
+    output_format.add_argument(
+        "--html",
+        action="store_true",
+        help="Print a static HTML calendar page instead of a table",
     )
     arguments = parser.parse_args(argument_list)
 
@@ -38,12 +45,18 @@ def main(argv=None):
         # Emit one JSON object per line for each combined event.
         for line in ics_render.events.get_events_as_jsonl_lines_gen(combined_events):
             print(line)
+    elif arguments.html:
+        # Render combined events as a self-contained HTML document.
+        html_page = ics_render.html_calendar.build_static_calendar_html_page(
+            combined_events
+        )
+        print(html_page)
     else:
         # Render combined events as a tabular table.
         table_rows = ics_render.events.get_events_as_table_rows_gen(combined_events)
         table_text = tabulate.tabulate(
             table_rows,
-            headers=["Timestamp", "Duration", "Name"],
+            headers=["Start", "Duration", "Name"],
         )
         print(table_text)
 
