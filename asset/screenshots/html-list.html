@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendar</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      margin: 2rem;
+      color: #1a1a1a;
+      background: #fafafa;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .event-block {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .event-block:last-child {
+      margin-bottom: 0;
+    }
+    .event-name {
+      font-size: 1.1rem;
+      margin: 0 0 0.5rem;
+    }
+    .event-detail {
+      margin: 0.25rem 0;
+    }
+    .event-label {
+      font-weight: 600;
+    }
+    .event-description {
+      margin: 0.75rem 0 0;
+      color: #444;
+    }
+    .no-events {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calendar</h1>
+  <div class="event-list">
+    <article class="event-block">
+      <h2 class="event-name" title="Daily team sync">Morning standup</h2>
+      <p class="event-detail"><span class="event-label">Start:</span> 2024-06-01T09:00:00+00:00</p>
+      <p class="event-detail"><span class="event-label">Stop:</span> 2024-06-01T09:30:00+00:00</p>
+      <p class="event-detail"><span class="event-label">Duration:</span> 0:30:00</p>
+      <p class="event-description">Daily team sync</p>
+    </article>
+    <article class="event-block">
+      <h2 class="event-name">All-day planning</h2>
+      <p class="event-detail"><span class="event-label">Start:</span> 2024-06-10</p>
+      <p class="event-detail"><span class="event-label">Stop:</span> 2024-06-11</p>
+      <p class="event-detail"><span class="event-label">Duration:</span> 1 day</p>
+    </article>
+    <article class="event-block">
+      <h2 class="event-name">Release review</h2>
+      <p class="event-detail"><span class="event-label">Start:</span> 2024-06-15T14:00:00+00:00</p>
+      <p class="event-detail"><span class="event-label">Stop:</span> 2024-06-15T15:00:00+00:00</p>
+      <p class="event-detail"><span class="event-label">Duration:</span> 1:00:00</p>
+    </article>
+  </div>
+</body>
+</html>
+

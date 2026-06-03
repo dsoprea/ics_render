@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendar</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      margin: 2rem;
+      color: #1a1a1a;
+      background: #fafafa;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .month-select-row {
+      margin-bottom: 1rem;
+    }
+    .month-select-row label {
+      margin-right: 0.5rem;
+      font-weight: 600;
+    }
+    .month-select {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.35rem 0.5rem;
+    }
+    .has-month-select .month-calendar {
+      display: none;
+      margin-bottom: 0;
+    }
+    .has-month-select .month-calendar.is-active {
+      display: block;
+    }
+    .month-calendar {
+      margin-bottom: 2.5rem;
+    }
+    .month-calendar:last-child {
+      margin-bottom: 0;
+    }
+    .month-heading {
+      font-size: 1.25rem;
+      margin: 0 0 0.75rem;
+    }
+    .calendar-grid {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .calendar-grid th,
+    .calendar-grid td {
+      border: 1px solid #ddd;
+      vertical-align: top;
+      width: 14.28%;
+    }
+    .calendar-grid th {
+      background: #f0f0f0;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .calendar-grid tbody td.day-cell,
+    .calendar-grid tbody td.padding-day {
+      padding: 0;
+      vertical-align: top;
+    }
+    .day-cell-frame {
+      position: relative;
+      width: 100%;
+    }
+    .day-cell-frame::before {
+      content: "";
+      display: block;
+      padding-top: 100%;
+    }
+    .day-cell-content {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      padding: 0.35rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    .padding-day {
+      background: #f5f5f5;
+    }
+    .day-number {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+      color: #333;
+    }
+    .day-events {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .calendar-event {
+      font-size: 0.75rem;
+      margin-bottom: 0.2rem;
+      padding: 0.15rem 0.25rem;
+      background: #e8f0fe;
+      border-radius: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .event-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .event-modal.is-open {
+      display: flex;
+    }
+    .event-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+    }
+    .event-modal-dialog {
+      position: relative;
+      overflow: visible;
+      background: #fff;
+      max-width: 28rem;
+      width: calc(100% - 2rem);
+      padding: 1.25rem 1.5rem;
+      border-radius: 6px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+    .event-modal-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #555;
+    }
+    .event-modal-title {
+      font-size: 1.15rem;
+      margin: 0 2rem 0.75rem 0;
+    }
+    .event-modal-details {
+      margin: 0 0 0.75rem;
+    }
+    .event-modal-details dt {
+      font-weight: 600;
+      margin-top: 0.35rem;
+    }
+    .event-modal-details dd {
+      margin: 0.15rem 0 0;
+    }
+    .event-modal-description-block {
+      display: none;
+    }
+    .event-modal-description-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+    .event-modal-description {
+      flex: 1;
+      margin: 0;
+      color: #444;
+      white-space: pre-wrap;
+    }
+    .event-modal-copy-description {
+      flex-shrink: 0;
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f5f5f5;
+      cursor: pointer;
+    }
+    .copy-toast {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.5rem 1rem;
+      background: #333;
+      color: #fff;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .copy-toast[hidden] {
+      display: none;
+    }
+    .no-events {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calendar</h1>
+  <div class="calendar-months">
+  <section class="month-calendar" id="month-2024-06">
+    <h2 class="month-heading">June 2024</h2>
+    <table class="calendar-grid">
+      <thead>
+        <tr>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">1</span>
+              <ul class="day-events">
+                <li class="calendar-event" role="button" tabindex="0" data-event-name="Morning standup" data-event-start="2024-06-01T09:00:00+00:00" data-event-stop="2024-06-01T09:30:00+00:00" data-event-duration="0:30:00" data-event-description="Daily team sync">09:00 Morning standup</li>
+              </ul>
+
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">2</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">3</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">4</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">5</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">6</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">7</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">8</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">9</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">10</span>
+              <ul class="day-events">
+                <li class="calendar-event" role="button" tabindex="0" data-event-name="All-day planning" data-event-start="2024-06-10" data-event-stop="2024-06-11" data-event-duration="1 day" data-event-description="">All-day planning</li>
+              </ul>
+
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">11</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">12</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">13</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">14</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">15</span>
+              <ul class="day-events">
+                <li class="calendar-event" role="button" tabindex="0" data-event-name="Release review" data-event-start="2024-06-15T14:00:00+00:00" data-event-stop="2024-06-15T15:00:00+00:00" data-event-duration="1:00:00" data-event-description="">14:00 Release review</li>
+              </ul>
+
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">16</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">17</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">18</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">19</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">20</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">21</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">22</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">23</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">24</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">25</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">26</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">27</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">28</span>
+            </div>
+          </div>
+        </td>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">29</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="day-cell">
+          <div class="day-cell-frame">
+            <div class="day-cell-content">
+              <span class="day-number">30</span>
+            </div>
+          </div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+        <td class="padding-day">
+          <div class="day-cell-frame"></div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  </div>
+  <div id="event-modal" class="event-modal is-open">
+    <div class="event-modal-backdrop"></div>
+    <div class="event-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+      <button type="button" class="event-modal-close" aria-label="Close">&times;</button>
+      <h2 id="event-modal-title" class="event-modal-title">Morning standup</h2>
+      <dl class="event-modal-details">
+        <dt>Start</dt>
+        <dd class="event-modal-start">2024-06-01T09:00:00+00:00</dd>
+        <dt>Stop</dt>
+        <dd class="event-modal-stop">2024-06-01T09:30:00+00:00</dd>
+        <dt>Duration</dt>
+        <dd class="event-modal-duration">0:30:00</dd>
+      </dl>
+      <div class="event-modal-description-block" style="display: block">
+        <div class="event-modal-description-row">
+          <p class="event-modal-description">Daily team sync</p>
+          <button type="button" class="event-modal-copy-description" aria-label="Copy description">Copy</button>
+        </div>
+      </div>
+      <div id="copy-toast" class="copy-toast" role="status" aria-live="polite" hidden>Copied</div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var copy_toast = document.getElementById("copy-toast");
+      var copy_toast_hide_timeout = null;
+
+      function show_copied_toast() {
+        if (!copy_toast) {
+          return;
+        }
+        if (copy_toast_hide_timeout !== null) {
+          clearTimeout(copy_toast_hide_timeout);
+        }
+        copy_toast.hidden = false;
+        copy_toast_hide_timeout = setTimeout(function () {
+          copy_toast.hidden = true;
+          copy_toast_hide_timeout = null;
+        }, 2000);
+      }
+
+      function copy_description_using_fallback(description_text) {
+        var textarea = document.createElement("textarea");
+        textarea.value = description_text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+
+      var modal = document.getElementById("event-modal");
+      if (!modal) {
+        return;
+      }
+      var modal_title = modal.querySelector(".event-modal-title");
+      var modal_start = modal.querySelector(".event-modal-start");
+      var modal_stop = modal.querySelector(".event-modal-stop");
+      var modal_duration = modal.querySelector(".event-modal-duration");
+      var modal_description = modal.querySelector(".event-modal-description");
+      var modal_description_block = modal.querySelector(".event-modal-description-block");
+      var modal_copy_description = modal.querySelector(".event-modal-copy-description");
+      var modal_close = modal.querySelector(".event-modal-close");
+      var modal_backdrop = modal.querySelector(".event-modal-backdrop");
+
+      function copy_description_to_clipboard() {
+        var description_text = modal_description.textContent;
+        if (!description_text) {
+          return;
+        }
+        function finish_copy() {
+          show_copied_toast();
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(description_text).then(function () {
+            finish_copy();
+          }).catch(function () {
+            copy_description_using_fallback(description_text);
+            finish_copy();
+          });
+          return;
+        }
+        copy_description_using_fallback(description_text);
+        finish_copy();
+      }
+
+      function open_event_modal(calendar_event) {
+        modal_title.textContent = calendar_event.getAttribute("data-event-name") || "";
+        modal_start.textContent = calendar_event.getAttribute("data-event-start") || "";
+        modal_stop.textContent = calendar_event.getAttribute("data-event-stop") || "";
+        modal_duration.textContent = calendar_event.getAttribute("data-event-duration") || "";
+        var description_text = calendar_event.getAttribute("data-event-description") || "";
+        modal_description.textContent = description_text;
+        if (description_text) {
+          modal_description_block.style.display = "block";
+        } else {
+          modal_description_block.style.display = "none";
+        }
+        modal.classList.add("is-open");
+      }
+
+      function close_event_modal() {
+        modal.classList.remove("is-open");
+      }
+
+      document.addEventListener("click", function (click_event) {
+        var click_target = click_event.target;
+        if (!click_target.closest) {
+          return;
+        }
+        var calendar_event = click_target.closest(".calendar-event");
+        if (calendar_event) {
+          open_event_modal(calendar_event);
+          return;
+        }
+        if (click_target.closest(".event-modal-copy-description")) {
+          copy_description_to_clipboard();
+          return;
+        }
+        if (
+          click_target === modal_backdrop
+          || click_target === modal_close
+        ) {
+          close_event_modal();
+        }
+      });
+
+      document.addEventListener("keydown", function (keydown_event) {
+        if (keydown_event.key === "Escape") {
+          close_event_modal();
+        }
+        if (keydown_event.key === "Enter" || keydown_event.key === " ") {
+          var focused = document.activeElement;
+          if (focused && focused.classList.contains("calendar-event")) {
+            keydown_event.preventDefault();
+            open_event_modal(focused);
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
