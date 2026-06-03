@@ -50,10 +50,10 @@ def test_main_html_list_prints_blocks(capsys):
     assert '<p class="event-description">Daily team sync</p>' in captured.out
 
 
-def test_main_html_prints_document(capsys):
+def test_main_html_table_prints_document(capsys):
     early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
     argv = [
-        "--html",
+        "--html-table",
         "--filepath",
         early_path,
     ]
