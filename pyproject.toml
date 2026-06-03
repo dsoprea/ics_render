@@ -1,7 +1,7 @@
 [project]
 name = "ics_render"
 version = "0.1.0"
-description = "Parse ICS calendar files and print events in a sorted table"
+description = "Parse one or more ICS calendar files and output in different formats"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -11,7 +11,6 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/dsoprea/ics_render"
-Repository = "https://github.com/dsoprea/ics_render"
 
 [project.scripts]
 ics_render = "ics_render.entrypoint.ics_render:main"
