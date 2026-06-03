@@ -1,8 +1,12 @@
-# ics_render
+[![PyPI version](https://img.shields.io/pypi/v/ics_render)](https://pypi.org/project/ics_render/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/ics_render)](https://pypi.org/project/ics_render/)
+[![Python versions](https://img.shields.io/pypi/pyversions/ics_render)](https://pypi.org/project/ics_render/)
+
+# Overview
 
 Parse one or more ICS calendar files, merge their events, sort by start time, and print the result in several formats.
 
-## Install
+# Install
 
 ```bash
 python -m venv .venv
@@ -10,7 +14,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-## Basic usage
+# Basic usage
 
 `--filepath` is required and may be repeated. Paths are read in order; events from every file are combined and sorted by start time.
 
@@ -20,11 +24,11 @@ ics_render --filepath calendar-a.ics --filepath calendar-b.ics
 
 Without an output flag, `ics_render` prints a text table to stdout.
 
-## Output modes
+# Output modes
 
 Output format flags are mutually exclusive. Pick one per run.
 
-### Default text table
+## Default text table
 
 Sorted columns: **Start**, **Duration**, **Name**.
 
@@ -40,7 +44,7 @@ Start                      Duration    Name
 2024-06-15T14:00:00+00:00  1:00:00     Release review
 ```
 
-### JSON Lines (`--jsonl`)
+## JSON Lines (`--jsonl`)
 
 Each event is one JSON object on its own line. Keys are lower-case, underscore-separated names taken from the original VEVENT properties (`summary`, `start`, `end`, and so on). Timestamp values use ISO 8601.
 
@@ -60,7 +64,7 @@ Redirect to a file:
 ics_render --jsonl --filepath calendar.ics > events.jsonl
 ```
 
-### HTML month grid (`--html`)
+## HTML month grid (`--html`)
 
 A self-contained HTML page with a traditional calendar layout: weeks as rows, days as columns (Sunday first), events listed inside each day cell. Timed events show `HH:MM` before the name.
 
@@ -82,7 +86,7 @@ Open in a browser:
 xdg-open calendar.html
 ```
 
-### HTML table (`--html-table`)
+## HTML table (`--html-table`)
 
 A self-contained HTML page: one table row per event with **Start**, **Stop**, **Duration**, and **Name**. Hover the name to see the description as a tooltip.
 
@@ -92,7 +96,7 @@ ics_render --html-table --filepath tests/fixtures/early.ics --filepath tests/fix
 
 ![HTML table output](asset/screenshots/html-table.png)
 
-### HTML list (`--html-list`)
+## HTML list (`--html-list`)
 
 A self-contained HTML page: each event is a spaced block with name, start, stop, duration, and the full description at the bottom (newlines rendered as line breaks).
 
@@ -102,13 +106,13 @@ ics_render --html-list --filepath tests/fixtures/early.ics --filepath tests/fixt
 
 ![HTML list output](asset/screenshots/html-list.png)
 
-## Tests
+# Tests
 
 ```bash
 python -m pytest -q
 ```
 
-## Regenerating README screenshots
+# Regenerating README screenshots
 
 Screenshots under `asset/screenshots/` are produced from the test fixtures using Brave in headless mode:
 
