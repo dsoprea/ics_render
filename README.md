@@ -1,6 +1,6 @@
-[![PyPI version](https://img.shields.io/pypi/v/ics_render)](https://pypi.org/project/ics_render/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/ics_render)](https://pypi.org/project/ics_render/)
-[![Python versions](https://img.shields.io/pypi/pyversions/ics_render)](https://pypi.org/project/ics_render/)
+[![PyPI version](https://img.shields.io/pypi/v/ics-render)](https://pypi.org/project/ics-render/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/ics-render)](https://pypi.org/project/ics-render/)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/)
 
 # Overview
 
