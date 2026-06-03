@@ -33,6 +33,11 @@ def main(argv=None):
         help="Print raw event data as JSON Lines instead of a table",
     )
     output_format.add_argument(
+        "--html",
+        action="store_true",
+        help="Print a static HTML month-grid calendar instead of a text table",
+    )
+    output_format.add_argument(
         "--html-table",
         action="store_true",
         help="Print a static HTML calendar table instead of a text table",
@@ -50,6 +55,12 @@ def main(argv=None):
         # Emit one JSON object per line for each combined event.
         for line in ics_render.events.get_events_as_jsonl_lines_gen(combined_events):
             print(line)
+    elif arguments.html:
+        # Render combined events as a traditional month-grid HTML calendar.
+        html_page = ics_render.html_calendar.build_static_calendar_html_grid_page(
+            combined_events
+        )
+        print(html_page)
     elif arguments.html_table:
         # Render combined events as a self-contained HTML table document.
         html_page = ics_render.html_calendar.build_static_calendar_html_page(

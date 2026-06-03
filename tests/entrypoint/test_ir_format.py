@@ -50,6 +50,26 @@ def test_main_html_list_prints_blocks(capsys):
     assert '<p class="event-description">Daily team sync</p>' in captured.out
 
 
+def test_main_html_prints_month_grid(capsys):
+    early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
+    late_path = os.path.join(_FIXTURES_DIRECTORY, "late.ics")
+    argv = [
+        "--html",
+        "--filepath",
+        early_path,
+        "--filepath",
+        late_path,
+    ]
+
+    ics_render.entrypoint.ir_format.main(argv)
+    captured = capsys.readouterr()
+
+    assert '<table class="calendar-grid">' in captured.out
+    assert "Morning standup" in captured.out
+    assert "All-day planning" in captured.out
+    assert "<th>Start</th>" not in captured.out
+
+
 def test_main_html_table_prints_document(capsys):
     early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
     argv = [
