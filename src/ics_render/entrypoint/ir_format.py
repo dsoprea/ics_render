@@ -37,6 +37,11 @@ def main(argv=None):
         action="store_true",
         help="Print a static HTML calendar page instead of a table",
     )
+    output_format.add_argument(
+        "--html-list",
+        action="store_true",
+        help="Print a static HTML calendar page as spaced event blocks",
+    )
     arguments = parser.parse_args(argument_list)
 
     combined_events = ics_render.events.combine_events_gen(arguments.filepath)
@@ -48,6 +53,12 @@ def main(argv=None):
     elif arguments.html:
         # Render combined events as a self-contained HTML document.
         html_page = ics_render.html_calendar.build_static_calendar_html_page(
+            combined_events
+        )
+        print(html_page)
+    elif arguments.html_list:
+        # Render combined events as spaced HTML blocks.
+        html_page = ics_render.html_calendar.build_static_calendar_html_list_page(
             combined_events
         )
         print(html_page)

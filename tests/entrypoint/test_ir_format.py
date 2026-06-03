@@ -33,6 +33,23 @@ def test_main_jsonl_prints_sorted_events(capsys):
     assert parsed_events[0]["start"]["value"] == "2024-06-01T09:00:00+00:00"
 
 
+def test_main_html_list_prints_blocks(capsys):
+    early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
+    argv = [
+        "--html-list",
+        "--filepath",
+        early_path,
+    ]
+
+    ics_render.entrypoint.ir_format.main(argv)
+    captured = capsys.readouterr()
+
+    assert '<article class="event-block">' in captured.out
+    assert "<table>" not in captured.out
+    assert 'title="Daily team sync"' in captured.out
+    assert '<p class="event-description">Daily team sync</p>' in captured.out
+
+
 def test_main_html_prints_document(capsys):
     early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
     argv = [
