@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ir_format = "ics_render.entrypoint.ir_format:main"
+ics_render = "ics_render.entrypoint.ics_render:main"
 
 [build-system]
 requires = ["hatchling"]

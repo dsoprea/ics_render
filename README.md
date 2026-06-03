@@ -15,10 +15,10 @@ pip install -e ".[dev]"
 `--filepath` is required and may be repeated. Paths are read in order; events from every file are combined and sorted by start time.
 
 ```bash
-ir_format --filepath calendar-a.ics --filepath calendar-b.ics
+ics_render --filepath calendar-a.ics --filepath calendar-b.ics
 ```
 
-Without an output flag, `ir_format` prints a text table to stdout.
+Without an output flag, `ics_render` prints a text table to stdout.
 
 ## Output modes
 
@@ -29,7 +29,7 @@ Output format flags are mutually exclusive. Pick one per run.
 Sorted columns: **Start**, **Duration**, **Name**.
 
 ```bash
-ir_format --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics
+ics_render --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics
 ```
 
 ```text
@@ -45,7 +45,7 @@ Start                      Duration    Name
 Each event is one JSON object on its own line. Keys are lower-case, underscore-separated names taken from the original VEVENT properties (`summary`, `start`, `end`, and so on). Timestamp values use ISO 8601.
 
 ```bash
-ir_format --jsonl --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics
+ics_render --jsonl --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics
 ```
 
 ```jsonl
@@ -57,7 +57,7 @@ ir_format --jsonl --filepath tests/fixtures/early.ics --filepath tests/fixtures/
 Redirect to a file:
 
 ```bash
-ir_format --jsonl --filepath calendar.ics > events.jsonl
+ics_render --jsonl --filepath calendar.ics > events.jsonl
 ```
 
 ### HTML month grid (`--html`)
@@ -69,7 +69,7 @@ When events span more than one month, a **Month** drop-down at the top switches 
 Click an event to open a detail modal (start, stop, duration, description). Use **Copy** beside the description to copy it to the clipboard; a **Copied** toast confirms success.
 
 ```bash
-ir_format --html --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics > calendar.html
+ics_render --html --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics > calendar.html
 ```
 
 ![HTML month grid](asset/screenshots/html-grid.png)
@@ -87,7 +87,7 @@ xdg-open calendar.html
 A self-contained HTML page: one table row per event with **Start**, **Stop**, **Duration**, and **Name**. Hover the name to see the description as a tooltip.
 
 ```bash
-ir_format --html-table --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics > calendar-table.html
+ics_render --html-table --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics > calendar-table.html
 ```
 
 ![HTML table output](asset/screenshots/html-table.png)
@@ -97,7 +97,7 @@ ir_format --html-table --filepath tests/fixtures/early.ics --filepath tests/fixt
 A self-contained HTML page: each event is a spaced block with name, start, stop, duration, and the full description at the bottom (newlines rendered as line breaks).
 
 ```bash
-ir_format --html-list --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics > calendar-list.html
+ics_render --html-list --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics > calendar-list.html
 ```
 
 ![HTML list output](asset/screenshots/html-list.png)

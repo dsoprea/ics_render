@@ -10,10 +10,10 @@ def _get_project_root():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-def _run_ir_format(argument_list):
+def _run_ics_render(argument_list):
     project_root = _get_project_root()
-    ir_format_executable = os.path.join(project_root, ".venv", "bin", "ir_format")
-    command = [ir_format_executable] + argument_list
+    ics_render_executable = os.path.join(project_root, ".venv", "bin", "ics_render")
+    command = [ics_render_executable] + argument_list
     completed = subprocess.run(
         command,
         check=True,
@@ -56,9 +56,9 @@ def main():
         late_path,
     ]
 
-    html_grid_text = _run_ir_format(["--html"] + filepath_arguments)
-    html_table_text = _run_ir_format(["--html-table"] + filepath_arguments)
-    html_list_text = _run_ir_format(["--html-list"] + filepath_arguments)
+    html_grid_text = _run_ics_render(["--html"] + filepath_arguments)
+    html_table_text = _run_ics_render(["--html-table"] + filepath_arguments)
+    html_list_text = _run_ics_render(["--html-list"] + filepath_arguments)
 
     with open(
         os.path.join(screenshots_directory, "html-grid.html"),

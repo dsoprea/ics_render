@@ -1,9 +1,9 @@
-"""Tests for the ir_format CLI entrypoint."""
+"""Tests for the ics_render CLI entrypoint."""
 
 import json
 import os
 
-import ics_render.entrypoint.ir_format
+import ics_render.entrypoint.ics_render
 
 _FIXTURES_DIRECTORY = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -19,7 +19,7 @@ def test_main_jsonl_prints_sorted_events(capsys):
         early_path,
     ]
 
-    ics_render.entrypoint.ir_format.main(argv)
+    ics_render.entrypoint.ics_render.main(argv)
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
     parsed_events = []
@@ -41,7 +41,7 @@ def test_main_html_list_prints_blocks(capsys):
         early_path,
     ]
 
-    ics_render.entrypoint.ir_format.main(argv)
+    ics_render.entrypoint.ics_render.main(argv)
     captured = capsys.readouterr()
 
     assert '<article class="event-block">' in captured.out
@@ -61,7 +61,7 @@ def test_main_html_prints_month_grid(capsys):
         late_path,
     ]
 
-    ics_render.entrypoint.ir_format.main(argv)
+    ics_render.entrypoint.ics_render.main(argv)
     captured = capsys.readouterr()
 
     assert '<table class="calendar-grid">' in captured.out
@@ -78,7 +78,7 @@ def test_main_html_table_prints_document(capsys):
         early_path,
     ]
 
-    ics_render.entrypoint.ir_format.main(argv)
+    ics_render.entrypoint.ics_render.main(argv)
     captured = capsys.readouterr()
 
     assert "<!DOCTYPE html>" in captured.out
