@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Generate README screenshot images from test fixtures."""
 
-import html
 import os
-import shutil
 import subprocess
 import sys
 
@@ -24,101 +22,6 @@ def _run_ir_format(argument_list):
         cwd=project_root,
     )
     return completed.stdout
-
-
-def _write_text_preview_html(screenshots_directory, filename, title, text_content):
-    escaped_title = html.escape(title)
-    escaped_text = html.escape(text_content)
-    document = (
-        "<!DOCTYPE html>\n"
-        '<html lang="en">\n'
-        "<head>\n"
-        '  <meta charset="utf-8">\n'
-        "  <title>"
-        + escaped_title
-        + "</title>\n"
-        "  <style>\n"
-        "    body {\n"
-        "      font-family: ui-monospace, monospace;\n"
-        "      font-size: 13px;\n"
-        "      line-height: 1.45;\n"
-        "      margin: 1.25rem;\n"
-        "      background: #fafafa;\n"
-        "      color: #1a1a1a;\n"
-        "    }\n"
-        "    pre {\n"
-        "      margin: 0;\n"
-        "      white-space: pre-wrap;\n"
-        "      word-break: break-word;\n"
-        "    }\n"
-        "  </style>\n"
-        "</head>\n"
-        "<body>\n"
-        "  <pre>"
-        + escaped_text
-        + "</pre>\n"
-        "</body>\n"
-        "</html>\n"
-    )
-
-    output_path = os.path.join(screenshots_directory, filename)
-    with open(output_path, "w", encoding="utf-8") as file_handle:
-        file_handle.write(document)
-
-
-def _write_jsonl_preview_html(screenshots_directory, filename, text_content):
-    escaped_text = html.escape(text_content)
-    document = (
-        "<!DOCTYPE html>\n"
-        '<html lang="en">\n'
-        "<head>\n"
-        '  <meta charset="utf-8">\n'
-        "  <title>JSONL output</title>\n"
-        "  <style>\n"
-        "    body {\n"
-        "      font-family: ui-monospace, monospace;\n"
-        "      font-size: 12px;\n"
-        "      line-height: 1.35;\n"
-        "      margin: 0.75rem;\n"
-        "      background: #fafafa;\n"
-        "      color: #1a1a1a;\n"
-        "    }\n"
-        "    pre {\n"
-        "      margin: 0;\n"
-        "      white-space: pre;\n"
-        "    }\n"
-        "  </style>\n"
-        "</head>\n"
-        "<body>\n"
-        "  <pre>"
-        + escaped_text
-        + "</pre>\n"
-        "</body>\n"
-        "</html>\n"
-    )
-
-    output_path = os.path.join(screenshots_directory, filename)
-    with open(output_path, "w", encoding="utf-8") as file_handle:
-        file_handle.write(document)
-
-
-def _trim_screenshot_png(png_path):
-    convert_executable = shutil.which("magick")
-    if convert_executable is None:
-        convert_executable = shutil.which("convert")
-
-    if convert_executable is None:
-        return
-
-    absolute_png_path = os.path.abspath(png_path)
-    command = [
-        convert_executable,
-        absolute_png_path,
-        "-trim",
-        "+repage",
-        absolute_png_path,
-    ]
-    subprocess.run(command, check=True)
 
 
 def _capture_screenshot(screenshots_directory, html_filename, png_filename, window_size):
@@ -153,37 +56,9 @@ def main():
         late_path,
     ]
 
-    table_text = _run_ir_format(filepath_arguments)
-    jsonl_text = _run_ir_format(["--jsonl"] + filepath_arguments)
     html_grid_text = _run_ir_format(["--html"] + filepath_arguments)
     html_table_text = _run_ir_format(["--html-table"] + filepath_arguments)
     html_list_text = _run_ir_format(["--html-list"] + filepath_arguments)
-
-    with open(
-        os.path.join(screenshots_directory, "sample-table.txt"),
-        "w",
-        encoding="utf-8",
-    ) as file_handle:
-        file_handle.write(table_text)
-
-    with open(
-        os.path.join(screenshots_directory, "sample.jsonl"),
-        "w",
-        encoding="utf-8",
-    ) as file_handle:
-        file_handle.write(jsonl_text)
-
-    _write_text_preview_html(
-        screenshots_directory,
-        "table-preview.html",
-        "Default table output",
-        table_text,
-    )
-    _write_jsonl_preview_html(
-        screenshots_directory,
-        "jsonl-preview.html",
-        jsonl_text,
-    )
 
     with open(
         os.path.join(screenshots_directory, "html-grid.html"),
@@ -250,8 +125,6 @@ def main():
         file_handle.write(modal_demo_text)
 
     captures = [
-        ("table-preview.html", "default-table.png", (920, 220)),
-        ("jsonl-preview.html", "jsonl.png", (960, 130)),
         ("html-grid.html", "html-grid.png", (1100, 720)),
         ("html-table.html", "html-table.png", (1000, 360)),
         ("html-list.html", "html-list.png", (1000, 520)),
@@ -261,9 +134,6 @@ def main():
     # Capture each HTML preview as a PNG for the README.
     for html_filename, png_filename, window_size in captures:
         _capture_screenshot(screenshots_directory, html_filename, png_filename, window_size)
-        if png_filename == "jsonl.png":
-            png_path = os.path.join(screenshots_directory, png_filename)
-            _trim_screenshot_png(png_path)
 
     return 0
 

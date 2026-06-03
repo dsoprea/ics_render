@@ -1,5 +1,0 @@
-Start                      Duration    Name
--------------------------  ----------  ----------------
-2024-06-01T09:00:00+00:00  0:30:00     Morning standup
-2024-06-10                 1 day       All-day planning
-2024-06-15T14:00:00+00:00  1:00:00     Release review

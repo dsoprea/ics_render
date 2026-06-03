@@ -32,7 +32,13 @@ Sorted columns: **Start**, **Duration**, **Name**.
 ir_format --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics
 ```
 
-![Default text table output](asset/screenshots/default-table.png)
+```text
+Start                      Duration    Name
+-------------------------  ----------  ----------------
+2024-06-01T09:00:00+00:00  0:30:00     Morning standup
+2024-06-10                 1 day       All-day planning
+2024-06-15T14:00:00+00:00  1:00:00     Release review
+```
 
 ### JSON Lines (`--jsonl`)
 
@@ -42,7 +48,11 @@ Each event is one JSON object on its own line. Keys are lower-case, underscore-s
 ir_format --jsonl --filepath tests/fixtures/early.ics --filepath tests/fixtures/late.ics
 ```
 
-![JSONL output](asset/screenshots/jsonl.png)
+```jsonl
+{"summary": {"parameters": {}, "value": "Morning standup"}, "start": {"parameters": {}, "value": "2024-06-01T09:00:00+00:00"}, "end": {"parameters": {}, "value": "2024-06-01T09:30:00+00:00"}, "uid": {"parameters": {}, "value": "early-1@example"}, "description": {"parameters": {}, "value": "Daily team sync"}}
+{"summary": {"parameters": {}, "value": "All-day planning"}, "start": {"parameters": {"value": "DATE"}, "value": "2024-06-10"}, "end": {"parameters": {"value": "DATE"}, "value": "2024-06-11"}, "uid": {"parameters": {}, "value": "late-2@example"}}
+{"summary": {"parameters": {}, "value": "Release review"}, "start": {"parameters": {}, "value": "2024-06-15T14:00:00+00:00"}, "end": {"parameters": {}, "value": "2024-06-15T15:00:00+00:00"}, "uid": {"parameters": {}, "value": "late-1@example"}}
+```
 
 Redirect to a file:
 
@@ -106,4 +116,4 @@ Screenshots under `asset/screenshots/` are produced from the test fixtures using
 ./make_screenshots
 ```
 
-Requires `brave` (or adjust the browser command in the script). Intermediate `.html` files in `asset/screenshots/` are updated at the same time.
+Requires `brave` (or adjust the browser command in the script). Intermediate `.html` files in `asset/screenshots/` are updated at the same time. Text table and JSONL examples in this README are sample output from the same fixtures.
