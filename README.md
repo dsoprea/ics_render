@@ -1,5 +1,4 @@
 [![PyPI version](https://img.shields.io/pypi/v/ics-render)](https://pypi.org/project/ics-render/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/ics-render)](https://pypi.org/project/ics-render/)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/)
 
 # Overview
