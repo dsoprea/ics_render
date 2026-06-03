@@ -1,5 +1,6 @@
 """Tests for ICS event loading and sorting."""
 
+import json
 import os
 
 import ics_render.events
@@ -44,6 +45,35 @@ def test_get_events_as_table_rows_gen_projects_columns():
     assert rows == [
         ("2024-06-01T09:00:00+00:00", "0:30:00", "Morning standup"),
     ]
+
+
+def test_get_events_as_jsonl_lines_gen_serializes_ics_record():
+    early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
+    events = list(ics_render.events.get_events_from_file_gen(early_path))
+
+    lines = list(ics_render.events.get_events_as_jsonl_lines_gen(events))
+    parsed = json.loads(lines[0])
+
+    assert parsed["summary"]["value"] == "Morning standup"
+    assert parsed["start"]["value"] == "2024-06-01T09:00:00+00:00"
+    assert parsed["end"]["value"] == "2024-06-01T09:30:00+00:00"
+    assert parsed["uid"]["value"] == "early-1@example"
+
+
+def test_ics_record_uses_friendly_keys_for_date_parameters():
+    late_path = os.path.join(_FIXTURES_DIRECTORY, "late.ics")
+    events = list(ics_render.events.get_events_from_file_gen(late_path))
+    all_day_event = None
+
+    # Find the all-day VEVENT in the fixture file.
+    for event in events:
+        if event["name"] == "All-day planning":
+            all_day_event = event
+            break
+
+    assert all_day_event is not None
+    assert all_day_event["ics_record"]["start"]["parameters"]["value"] == "DATE"
+    assert all_day_event["ics_record"]["start"]["value"] == "2024-06-10"
 
 
 def test_get_events_from_file_gen_reads_duration_from_dtend():

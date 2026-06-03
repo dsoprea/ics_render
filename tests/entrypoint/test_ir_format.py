@@ -1,0 +1,33 @@
+"""Tests for the ir_format CLI entrypoint."""
+
+import json
+import os
+
+import ics_render.entrypoint.ir_format
+
+_FIXTURES_DIRECTORY = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "fixtures",
+)
+
+
+def test_main_jsonl_prints_sorted_events(capsys):
+    early_path = os.path.join(_FIXTURES_DIRECTORY, "early.ics")
+    argv = [
+        "--jsonl",
+        "--filepath",
+        early_path,
+    ]
+
+    ics_render.entrypoint.ir_format.main(argv)
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    parsed_events = []
+
+    # Parse each JSONL line into a dict for assertion.
+    for line in lines:
+        parsed_events.append(json.loads(line))
+
+    assert len(parsed_events) == 1
+    assert parsed_events[0]["summary"]["value"] == "Morning standup"
+    assert parsed_events[0]["start"]["value"] == "2024-06-01T09:00:00+00:00"

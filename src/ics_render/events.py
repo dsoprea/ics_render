@@ -1,6 +1,7 @@
 """Load and normalize calendar events from ICS files."""
 
 import datetime
+import json
 import operator
 
 import icalendar
@@ -23,9 +24,10 @@ def get_events_from_file_gen(filepath):
             continue
 
         start_value = start_property.dt
-        sort_key = _sort_key_for_start(start_value)
+        sort_key = _build_sort_key_for_start(start_value)
         timestamp_label = _format_start(start_value)
-        duration_label = _duration_label_for_component(component, start_value)
+        duration_label = _build_duration_label_for_component(component, start_value)
+        ics_record = _build_ics_record_from_component(component)
         summary_property = component.get("summary")
         if summary_property is None:
             event_name = ""
@@ -37,6 +39,7 @@ def get_events_from_file_gen(filepath):
             "duration": duration_label,
             "name": event_name,
             "sort_key": sort_key,
+            "ics_record": ics_record,
         }
 
 
@@ -66,7 +69,72 @@ def get_events_as_table_rows_gen(events):
         yield row
 
 
-def _duration_label_for_component(component, start_value):
+def get_events_as_jsonl_lines_gen(events):
+    """Yield one JSON object per line for each VEVENT ICS record."""
+
+    # Serialize the original ICS properties and emit a JSONL line.
+    for event in events:
+        line = json.dumps(event["ics_record"])
+        yield line
+
+
+def _build_ics_record_from_component(component):
+    record = {}
+
+    # Copy each VEVENT property (name, parameters, value) from the parsed component.
+    for property_name, property_value in component.property_items():
+        if property_name in ("BEGIN", "END"):
+            continue
+
+        parameters = {}
+        for parameter_name, parameter_value in property_value.params.items():
+            parameter_key = _convert_ics_name_to_friendly_key(parameter_name)
+            parameters[parameter_key] = str(parameter_value)
+
+        encoded_value = property_value.to_ical()
+        value_text = _format_ics_property_value(property_value, encoded_value)
+
+        property_key = _convert_ics_name_to_friendly_key(property_name)
+        record[property_key] = {
+            "parameters": parameters,
+            "value": value_text,
+        }
+
+    return record
+
+
+def _format_ics_property_value(property_value, encoded_value):
+    if hasattr(property_value, "dt"):
+        date_or_time = property_value.dt
+        if isinstance(date_or_time, datetime.datetime):
+            return _format_start(date_or_time)
+        if isinstance(date_or_time, datetime.date):
+            return _format_start(date_or_time)
+
+    if isinstance(encoded_value, bytes):
+        return encoded_value.decode()
+    return str(encoded_value)
+
+
+def _convert_ics_name_to_friendly_key(ics_name):
+    normalized = ics_name.replace("-", "_").lower()
+
+    if normalized == "dtstart":
+        return "start"
+    if normalized == "dtend":
+        return "end"
+
+    if normalized.startswith("dt") and len(normalized) > 2:
+        suffix = normalized[2:]
+        return "dt_{suffix}".format(suffix=suffix)
+
+    if normalized == "tzid":
+        return "tz_id"
+
+    return normalized
+
+
+def _build_duration_label_for_component(component, start_value):
     duration_property = component.get("duration")
     if duration_property is not None:
         duration_timedelta = duration_property.dt
@@ -75,14 +143,14 @@ def _duration_label_for_component(component, start_value):
     end_property = component.get("dtend")
     if end_property is not None:
         end_value = end_property.dt
-        duration_timedelta = _timedelta_between(start_value, end_value)
+        duration_timedelta = _compute_timedelta_between(start_value, end_value)
         if duration_timedelta is not None:
             return _format_timedelta(duration_timedelta)
 
     return ""
 
 
-def _timedelta_between(start_value, end_value):
+def _compute_timedelta_between(start_value, end_value):
     start_normalized = _normalize_for_duration_math(start_value)
     end_normalized = _normalize_for_duration_math(end_value)
     if start_normalized is None:
@@ -133,7 +201,7 @@ def _format_timedelta(delta):
     return time_portion
 
 
-def _sort_key_for_start(start_value):
+def _build_sort_key_for_start(start_value):
     if isinstance(start_value, datetime.datetime):
         if start_value.tzinfo is None:
             return start_value.replace(tzinfo=datetime.timezone.utc)
